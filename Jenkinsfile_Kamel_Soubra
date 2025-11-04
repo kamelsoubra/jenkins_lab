@@ -53,16 +53,22 @@ if (Test-Path $userPython) {
 
     stage('Security Scan') {
       steps {
-        powershell '''
+        script {
+          catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+            powershell '''
 $env:PYTHONIOENCODING = 'utf-8'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [Console]::OutputEncoding
 & "venv\\Scripts\\python.exe" -m bandit -r . -f json -o bandit-report.json
+exit $LASTEXITCODE
 '''
+          }
+        }
         powershell '''
 # Show report in console using UTF-8
 Get-Content -Raw -Encoding UTF8 bandit-report.json | Write-Output
 '''
+        archiveArtifacts artifacts: 'bandit-report.json', allowEmptyArchive: true, onlyIfSuccessful: false
       }
     }
 
