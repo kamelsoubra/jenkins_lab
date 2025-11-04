@@ -1,0 +1,62 @@
+pipeline {
+  agent any
+
+  environment {
+    VIRTUAL_ENV = 'venv'
+  }
+
+  stages {
+    stage('Setup') {
+      steps {
+        script {
+          if (!fileExists("${env.WORKSPACE}/${VIRTUAL_ENV}")) {
+            sh "python3 -m venv ${VIRTUAL_ENV}"
+          }
+          sh "source ${VIRTUAL_ENV}/bin/activate && pip install --upgrade pip && pip install -r requirements.txt"
+        }
+      }
+    }
+
+    stage('Lint') {
+      steps {
+        sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh "source ${VIRTUAL_ENV}/bin/activate && pytest --maxfail=1 --disable-warnings"
+      }
+    }
+
+    stage('Coverage') {
+      steps {
+        sh "source ${VIRTUAL_ENV}/bin/activate && coverage run -m pytest"
+        sh "source ${VIRTUAL_ENV}/bin/activate && coverage report"
+        // optional HTML:
+        // sh "source ${VIRTUAL_ENV}/bin/activate && coverage html"
+        // archiveArtifacts artifacts: 'htmlcov/**', onlyIfSuccessful: true, allowEmptyArchive: true
+      }
+    }
+
+    stage('Security Scan') {
+      steps {
+        sh "source ${VIRTUAL_ENV}/bin/activate && bandit -r ."
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        echo "Deploying application..."
+        // Placeholder: simulate deploy
+        sh "echo 'Deployment successful!'"
+      }
+    }
+  }
+
+  post {
+    always {
+      cleanWs()
+    }
+  }
+}
