@@ -10,29 +10,30 @@ pipeline {
       steps {
         script {
           if (!fileExists("${env.WORKSPACE}/${VIRTUAL_ENV}")) {
-            sh "python3 -m venv ${VIRTUAL_ENV}"
+            powershell "python -m venv ${VIRTUAL_ENV}"
           }
-          sh "source ${VIRTUAL_ENV}/bin/activate && pip install --upgrade pip && pip install -r requirements.txt"
+          powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m pip install --upgrade pip"
+          powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m pip install -r requirements.txt"
         }
       }
     }
 
     stage('Lint') {
       steps {
-        sh "source ${VIRTUAL_ENV}/bin/activate && flake8 app.py"
+        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m flake8 app.py"
       }
     }
 
     stage('Test') {
       steps {
-        sh "source ${VIRTUAL_ENV}/bin/activate && pytest --maxfail=1 --disable-warnings"
+        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m pytest --maxfail=1 --disable-warnings"
       }
     }
 
     stage('Coverage') {
       steps {
-        sh "source ${VIRTUAL_ENV}/bin/activate && coverage run -m pytest"
-        sh "source ${VIRTUAL_ENV}/bin/activate && coverage report"
+        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m coverage run -m pytest"
+        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m coverage report"
         // optional HTML:
         // sh "source ${VIRTUAL_ENV}/bin/activate && coverage html"
         // archiveArtifacts artifacts: 'htmlcov/**', onlyIfSuccessful: true, allowEmptyArchive: true
@@ -41,7 +42,7 @@ pipeline {
 
     stage('Security Scan') {
       steps {
-        sh "source ${VIRTUAL_ENV}/bin/activate && bandit -r ."
+        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m bandit -r ."
       }
     }
 
@@ -49,7 +50,7 @@ pipeline {
       steps {
         echo "Deploying application..."
         // Placeholder: simulate deploy
-        sh "echo 'Deployment successful!'"
+        powershell "Write-Host 'Deployment successful!'"
       }
     }
   }
