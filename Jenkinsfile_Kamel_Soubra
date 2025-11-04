@@ -23,28 +23,28 @@ if (Test-Path $userPython) {
 }
 '''
           }
-          powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m pip install --upgrade pip"
-          powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m pip install -r requirements.txt"
+          powershell '''& "$env:WORKSPACE\$env:VIRTUAL_ENV\Scripts\python.exe" -m pip install --upgrade pip'''
+          powershell '''& "$env:WORKSPACE\$env:VIRTUAL_ENV\Scripts\python.exe" -m pip install -r requirements.txt'''
         }
       }
     }
 
     stage('Lint') {
       steps {
-        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m flake8 app.py"
+        powershell '''& "$env:WORKSPACE\$env:VIRTUAL_ENV\Scripts\python.exe" -m flake8 app.py'''
       }
     }
 
     stage('Test') {
       steps {
-        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m pytest --maxfail=1 --disable-warnings"
+        powershell '''& "$env:WORKSPACE\$env:VIRTUAL_ENV\Scripts\python.exe" -m pytest --maxfail=1 --disable-warnings'''
       }
     }
 
     stage('Coverage') {
       steps {
-        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m coverage run -m pytest"
-        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m coverage report"
+        powershell '''& "$env:WORKSPACE\$env:VIRTUAL_ENV\Scripts\python.exe" -m coverage run -m pytest'''
+        powershell '''& "$env:WORKSPACE\$env:VIRTUAL_ENV\Scripts\python.exe" -m coverage report'''
         // optional HTML:
         // sh "source ${VIRTUAL_ENV}/bin/activate && coverage html"
         // archiveArtifacts artifacts: 'htmlcov/**', onlyIfSuccessful: true, allowEmptyArchive: true
@@ -53,7 +53,7 @@ if (Test-Path $userPython) {
 
     stage('Security Scan') {
       steps {
-        powershell "& \"$env:WORKSPACE\\$env:VIRTUAL_ENV\\Scripts\\python.exe\" -m bandit -r ."
+        powershell '''& "$env:WORKSPACE\$env:VIRTUAL_ENV\Scripts\python.exe" -m bandit -r .'''
       }
     }
 
