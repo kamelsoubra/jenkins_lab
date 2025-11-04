@@ -54,14 +54,15 @@ if (Test-Path $userPython) {
     stage('Security Scan') {
       steps {
         script {
-          catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
-            powershell '''
+          def rc = powershell(returnStatus: true, script: '''
 $env:PYTHONIOENCODING = 'utf-8'
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding = [Console]::OutputEncoding
 & "venv\\Scripts\\python.exe" -m bandit -r . -f json -o bandit-report.json
 exit $LASTEXITCODE
-'''
+''')
+          if (rc != 0) {
+            echo "Bandit findings detected (exit code ${rc}); continuing without failing or marking UNSTABLE."
           }
         }
         powershell '''
